@@ -303,3 +303,23 @@ for item in lst:
     print('Id', item.find('id').text)
     print('Attribute', item.get('x'))
 ```
+### json
+
+it brings back python dictionary
+```py
+info = json.loads(data)
+```
+info
+
+
+[{'id': '001', 'x': '2', 'name': 'Chuck'},
+ {'id': '009', 'x': '7', 'name': 'Brent'}]
+
+
+and that is a list of dictionary
+
+
+### service oriented approach
+you end up with these applications that provides a service to the rest of an applications
+
+### geocoding apI
