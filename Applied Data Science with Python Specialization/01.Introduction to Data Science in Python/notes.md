@@ -291,3 +291,108 @@ df['2016-12':]
 ```py
 df.asfreq('W', method='ffill')
 ```
+
+
+# week 4
+
+week project to test the ability that i have learnt
+
+
+test the binomial distribution
+
+```py
+n = 'number of times to run '
+p = ' probability that it lands for the 0 condition'
+np.random.binomial(N, p)
+```
+the modern computional power allows us to simulate the effects of different parameters in the distribution
+
+we dont have to work with the math we can just simulate e the problem instead and see the results
+### bimodel distribution
+have 2 or more peaks
+![image](Screenshot_1.png)
+
+in the end her refered to Allen B. Downey book [thinkstats](https://greenteapress.com/thinkstats2/thinkstats2.pdf)
+
+
+### Hypothesis Testing
+is a core data analysis activity behind experimentation.
+
+A hypothesis is a statement that we can test.
+
+####case
+![image](Screenshot_2.png)
+
+We then examine the groups to determine
+whether this null hypothesis is
+true or not.
+
+If we find that there is
+a difference between groups,
+then we can reject the null hypothesis and
+we accept our alternative(our IDEA).
+
+If we look at the mean values for
+the late data frame as well, we get surprisingly similar numbers.
+
+There are slight differences, though.
+
+It looks like the end
+of the six assignments,
+the early users are doing better
+by about a percentage point.
+
+
+**So, is this enough to go ahead and make some interventions to actually try and change something in the way we teach?**
+
+#### threshold
+
+When doing hypothesis testing, we have to
+choose a significance level as a threshold for how much of a chance
+we're willing to accept.
+This significance level is
+typically called **alpha.**
+![image](Screenshot_3.png)
+
+which indicates a tolerance for
+a probability of between 5% and
+1% of chance.
+
+In a physics experiment where the
+conditions are much more controlled and
+thus, the burden of proof is much higher,
+you might expect to see alpha
+levels of 10 to the negative 5 or
+100,000th of a percentage.
+
+For this example, let's use a threshold
+of 0.05 for our alpha or 5%.
+
+### test the hypothesis
+The SciPy library contains a number
+of different statistical tests and
+forms a basis for
+hypothesis testing in Python.
+
+A **T test** is one way to compare
+the means of two different populations.
+In the SciPy library,
+the T test end function will
+compare two independent samples to
+see if they have different means.
+
+#### code
+```py
+stats.ttest_ind(early['assignment1_grade'], late['assignment1_grade'])
+```
+The result is a two with a test
+statistic and a p-value.
+
+The p-value here is much
+larger than our 0.05.
+So we cannot reject the null hypothesis(our idea was wrong if the null is true)
+
+we need a p value of .05 or less to reject the null and say that our idea is good
+
+#### p hacking
+![image](Screenshot_4.png)
