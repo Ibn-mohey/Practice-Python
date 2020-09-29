@@ -83,6 +83,90 @@ array3.min()
 array3.mean()
 ```
 **Now, we often think about two dimensional arrays being made up of rows and columns, but you can also think of these arrays as just a giant ordered list of numbers, and the *shape* of the array, the number of rows and columns, is just an abstraction that we have for a particular purpose. Actually, this is exactly how basic images are stored in computer environments**
+---
+
+# Week 2
+
+it referd us to the book [learning the pandas library by matt harrison](https://mcgillmsaa.files.wordpress.com/2018/05/learning-the-pandas-library-python-tools-for-data-munging-analysis-and-visual.pdf)
+
+he refered us to the web site  [excellen blog ](https://planetpython.org/)
+
+missing data in pandas
+
+```py
+np.nan != None
+np.nan also not  np.nan
+type(np.nan) = float64
+type(None) = object
+```
+
+you need to use special functions to test for the presence of not a number,
+```py
+
+np.isnan(np.nan)
+
+```
+
+
+
+###qeury
+
+if you wanted to see the fourth entry we would we would use the iloc
+
+
+If you wanted to see what class Molly has, we would use the loc attribute with a parameter
+
+---
+
+## DataFrameDataStructure
+
+The DataFrame is conceptually a two-dimensional series object, where there's an index and multiple columns of content, with each column having a label. In fact, the distinction between a column and a row is really only a conceptual distinction. And you can think of the DataFrame itself as simply a two-axes labeled array.
+
+ One of the powers of the Panda's DataFrame is that you can quickly select data based on multiple axes.
+
+the first is the row index the second is the column it self
+```py
+df.loc['school1', 'Name']
+
+# we also can take 2 columns
+df.loc[:,['Name', 'Score']]
+
+```
+
+
+**That's selecting and projecting data from a DataFrame based on row and column labels. The key concepts to remember are that the rows and columns are really just for our benefit. Underneath this is just a two axes labeled array, and transposing the columns is easy. Also, consider the issue of chaining carefully, and try to avoid it, as it can cause unpredictable results, where your intent was to obtain a view of the data, but instead Pandas returns to you a copy.**
+
+
+### drop
+
+```py
+copy_df.drop("Name", inplace=True, axis=1)
+```
+
+### columns name tips
+
+create some function that does the cleaning and then tell renamed to apply that function across all of the data.
+Python comes with a handy string function to strip white space called "strip()".
+When we pass this in to rename we pass the function as the mapper parameter, and then indicate whether the axis should be columns or index (row labels)
+```py
+new_df=new_df.rename(mapper=str.strip, axis='columns')
+```
+here we are passig the refrence to that function mapper
+
+We can also use the df.columns attribute by assigning to it a list of column names which will directly rename the columns.
+This will directly modify the original dataframe and is very efficient especially when you have a lot of columns and you only want to change a few.
+This technique is also not affected by subtle errors in the column names, a problem that we just encountered.
+With a list, you can use the list index to change a certain value or use list comprehension to change all of the values
+
+As an example, lets change all of the column names to lower case. First we need to get our list
+```py
+cols = list(df.columns)
+#Then a little list comprehenshion
+cols = [x.lower().strip() for x in cols] #remove all spaces and also lower all 
+#Then we just overwrite what is already in the .columns attribute
+df.columns=cols
+```
+
 
 ---
 
