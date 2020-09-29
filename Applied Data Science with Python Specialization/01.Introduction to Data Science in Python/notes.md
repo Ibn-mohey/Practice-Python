@@ -151,7 +151,7 @@ When we pass this in to rename we pass the function as the mapper parameter, and
 ```py
 new_df=new_df.rename(mapper=str.strip, axis='columns')
 ```
-here we are passig the refrence to that function mapper
+here we are passing the refrence to that function mapper
 
 We can also use the df.columns attribute by assigning to it a list of column names which will directly rename the columns.
 This will directly modify the original dataframe and is very efficient especially when you have a lot of columns and you only want to change a few.
@@ -162,10 +162,137 @@ As an example, lets change all of the column names to lower case. First we need 
 ```py
 cols = list(df.columns)
 #Then a little list comprehenshion
-cols = [x.lower().strip() for x in cols] #remove all spaces and also lower all 
+cols = [x.lower().strip() for x in cols] #remove all spaces and also lower all
 #Then we just overwrite what is already in the .columns attribute
 df.columns=cols
 ```
+---
+
+### QueryingDataFrame
+
+Boolean masking is the heart of fast and efficient querying in numpy and pandas, and its analogous to bit masking used in other areas of computational science.
+
+**A Boolean mask** is an array which can be of one dimension like a series, or two dimensions like a data frame, where each of the values in the array are **either true or false.**
+This array is essentially **overlaid** on top of the data structure that we're querying.
+And any cell aligned with the **true value will be admitted into our final result**, and any cell aligned with a false value will not.
+
+example
+```py
+admit_mask= df['chance of admit'] > 0.7
+```
+just lay it on top of the
+ data to "hide" the data you don't want, which is represented by all of the False values. We do this by using
+ the .where() function on the original DataFrame.
+```py
+df.where(admit_mask).head()
+```
+All of the rows which did not meet the condition have NaN data instead, but these rows were not dropped from our dataset.
+The next step is, if we don't want the NaN data, we use the dropna() function
+```py
+df.where(admit_mask).dropna().head()
+```
+
+or just use
+```py
+df[df['chance of admit'] > 0.7].head()
+```
+
+using the and in querying
+```py
+(df['chance of admit'] > 0.7) & (df['chance of admit'] < 0.9)
+```
+
+
+error
+```py
+(df['chance of admit'] > 0.7) and (df['chance of admit'] < 0.9)
+df['chance of admit'] > 0.7 & df['chance of admit'] < 0.9
+```
+
+another solution
+```py
+df['chance of admit'].gt(0.7) & df['chance of admit'].lt(0.9)
+# you can chain them too
+df['chance of admit'].gt(0.7).lt(0.9)
+```
+
+####note  When you use a MultiIndex
+
+We saw previously that the loc attribute of the DataFrame can take multiple arguments. And it could query both the
+row and the columns.
+When you use a MultiIndex, you must **provide** the **arguments** in **order** by the
+level you **wish** to **query**. Inside of the index, each **column** is **called** a **level** and the **outermost** **column is level zero**
+
+If we want to see the population results from **Washtenaw** **County** in **Michigan** the **state**, which is
+where I live, the **first** argument would be **Michigan** and the **second** would be **Washtenaw** County
+```py
+df.loc['Michigan', 'Washtenaw County']
+```
+```py
+df.loc[ [('Michigan', 'Washtenaw County'),
+         ('Michigan', 'Wayne County')] ]
+```
+replace
+```py
+
+df.replace([1, 3], [100, 300])
+```
+
+### regular expression on DF
+#### Here's my solution, first matching any number of characters then ending in .html
+```py
+df.replace(to_replace=".*.html$", value="webpage", regex=True)
+```
+### take the first and the last name
+```py
+def splitname(row,c):
+    # The row is a single Series object which is a single row indexed by column values
+    # Let's extract the firstname and create a new entry in the series
+    row['First']=row['President'].split(" ")[0]
+    # Let's do the same with the last word in the string
+    row['Last']=row['President'].split(" ")[-1]
+    # Now we just return the row and the pandas .apply() will take of merging them back into a DataFrame
+    return row
+df=df.apply(splitname, axis='columns')
+df.head()
+```
+
+It's worth looking at the pandas str module for other functions which have been written specifically
+to clean up strings in DataFrames, and you can find that in the docs in the Working with Text
+section: https://pandas.pydata.org/pandas-docs/stable/user_guide/text.html
+
+another way using Series.str.extract(pattern)
+
+```py
+pattern="(^[\w]*)(?:.* )([\w]*$)"
+df["President"].str.extract(pattern).head()
+```
+
+make it more good
+
+```py
+pattern="(?P<First>^[\w]*)(?:.* )(?P<Last>[\w]*$)"
+
+# Now call extract
+names=df["President"].str.extract(pattern).head()
+df["First"]=names["First"]
+df["Last"]=names["Last"]
+
+```
+
+Now lets move on to clean up that Born column. First, let's get rid of anything that isn't in the
+pattern of Month Day and Year.
+```py
+df["Born"]=df["Born"].str.extract("([\w]{3} [\w]{1,2}, [\w]{4})")
+```
+or
+```py
+df["Born"]=pd.to_datetime(df["Born"])
+```
+
+
+
+
 
 
 ---
