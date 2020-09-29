@@ -1,7 +1,93 @@
 # intoduction to data science
 
-#week 3
 ---
+
+#week 1
+
+lamda  
+lamda then arguments then one single expression
+```py
+lambda a, b, c : a + b
+```
+
+list comprehension
+
+```py
+my_list = []
+for number in range(0, 1000):
+    if number % 2 == 0:
+        my_list.append(number)
+my_list
+```
+same as
+```py
+my_list = [number for number in range(0,1000) if number % 2 == 0]
+my_list
+```
+
+quick on numpy
+
+```py
+a.dtype
+```
+
+Sometimes we know the shape of an array that we want to create, but not what we want to be in it. numpy
+offers several functions to create arrays with initial placeholders, such as zero's or one's.
+Lets create two arrays, both the same shape but with different filler values
+
+```py
+d = np.zeros((2,3))
+
+e = np.ones((2,3))
+
+np.random.rand(2,3)
+
+```
+create a **sequence** of **numbers** in an array with the **arrange**()
+The **fist** argument is the **starting** bound and the **second** argument is the **ending** bound, and the **third** argument is the **difference** between
+each consecutive numbers
+```py
+np.arange(10, 50, 2)
+```
+if we want to generate a **sequence** of **floats**, we can use the **linspace**() function.
+In this function the **third** argument isn't the difference between two numbers, but the **total number of items you want to generate**
+
+```py
+np.linspace( 0, 2, 15 ) # 15 numbers from 0 (inclusive) to 2 (inclusive)
+```
+
+### Array Operations
+We can do many things on arrays, such as
+
+1. mathematical manipulation
+(addition, subtraction, square,exponents)
+
+2. as well as use boolean arrays, which are binary values.
+
+3. We can also do matrix manipulation such
+as product, transpose, inverse, and so forth.
+if we want to do elementwise product, we use the "*" sign
+```py
+A*B
+```
+if we want to do matrix product, we use the "@" sign or use the dot function
+```py
+A@B
+```
+
+4. Numpy arrays have many interesting aggregation functions on them, such as  sum(), max(), min(), and mean()
+```py
+array3.sum()
+array3.max()
+array3.min()
+array3.mean()
+```
+**Now, we often think about two dimensional arrays being made up of rows and columns, but you can also think of these arrays as just a giant ordered list of numbers, and the *shape* of the array, the number of rows and columns, is just an abstraction that we have for a particular purpose. Actually, this is exactly how basic images are stored in computer environments**
+
+---
+
+#week 3
+
 ## how to merge data
 use
 ```py
