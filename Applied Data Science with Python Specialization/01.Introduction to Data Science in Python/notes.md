@@ -305,8 +305,8 @@ use
 df1
 df2
 how = "inner" , "outer" , "left" , "right"
-left_index = True
-right_index = True
+left_index = True or left_on='column1'
+right_index = True or right_on='column2'
 
 pd.merge()
 ```
@@ -318,6 +318,7 @@ pd.merge()
 pd.merge(staff_df, student_df, how='left', left_on='Name', right_on='Name')
 ```
 
+
 ### what happens when we have conflicts between the DataFrames?
 
 The merge function preserves this
@@ -325,17 +326,31 @@ information, but appends an _x or_y to help differentiate between which index we
 
 The _x is always the left DataFrame information, and the _ y is always the right DataFrame information.
 
-### Note
+### Note multi indexes
 
 we can use 2 indecs to join
 ```py
 pd.merge(staff_df, student_df, how='inner', left_on=['First Name','Last Name'], right_on=['First Name','Last Name'])
 ```
 
+### joining "vertically"
+meaning we put dataframes on top or at the bottom of each other
+```py
+frames = [df_2011, df_2012, df_2013]
+pd.concat(frames)
+```
+
+
+
 ---
+
 ## Idiomatic Pandas: Making Code Pandorable
 
 An idiomatic solution is often one which has both high performance and high readability.
+
+### method chaining
+ The general idea behind method chaining is that every method on an object returns a reference to that object.
+
 
 
 chain indexing
@@ -344,7 +359,10 @@ df.loc["column1"]['column2']
 ```
 it's bad pandas return a copy of a view depending upon the numpy
 
-it's better to do some thing called methid chaining
+
+
+
+it's better to do some thing called method chaining
 ```py
 (df.where(df['SUMLEV']==50)
     .dropna()
@@ -354,10 +372,16 @@ it's better to do some thing called methid chaining
 tradintional way not good but it's working
 
 ```py
-df = df[df['SUMLEV']==50]
+# First create a new dataframe from the original
+df = df[df['SUMLEV']==50] # I'll use the overloaded indexing operator [] which drops nans
+# Update the dataframe to have a new index, we use inplace=True to do this in place
 df.set_index(['STNAME','CTYNAME'], inplace=True)
+# Set the column names
 df.rename(columns={'ESTIMATESBASE2010': 'Estimates Base 2010'})
 ```
+
+
+#fucntion Map: apply
 it's noticable to understand the fucntion Map
 
 and applymap
@@ -377,7 +401,7 @@ def min_max(row):
     row['max'] = np.max(data)
     row['min'] = np.min(data)
     return row
-df.apply(min_max, axis=1)
+df.apply(min_max, axis='columns')
 ```
 better
 ```py
@@ -387,8 +411,40 @@ rows = ['POPESTIMATE2010',
         'POPESTIMATE2013',
         'POPESTIMATE2014',
         'POPESTIMATE2015']
-df.apply(lambda x: np.max(x[rows]), axis=1)
+df.apply(lambda x: np.max(x[rows]), axis='columns')
 ```
+
+The beauty of the apply function is that it allows flexibility in doing whatever manipulation that you desire, as the function you pass into apply can be any customized however you want.
+
+
+divide into
+
+```py
+def get_state_region(x):
+    northeast = ['Connecticut', 'Maine', 'Massachusetts', 'New Hampshire',
+                 'Rhode Island','Vermont','New York','New Jersey','Pennsylvania']
+    midwest = ['Illinois','Indiana','Michigan','Ohio','Wisconsin','Iowa',
+               'Kansas','Minnesota','Missouri','Nebraska','North Dakota',
+               'South Dakota']
+    south = ['Delaware','Florida','Georgia','Maryland','North Carolina',
+             'South Carolina','Virginia','District of Columbia','West Virginia',
+             'Alabama','Kentucky','Mississippi','Tennessee','Arkansas',
+             'Louisiana','Oklahoma','Texas']
+    west = ['Arizona','Colorado','Idaho','Montana','Nevada','New Mexico','Utah',
+            'Wyoming','Alaska','California','Hawaii','Oregon','Washington']
+
+    if x in northeast:
+        return "Northeast"
+    elif x in midwest:
+        return "Midwest"
+    elif x in south:
+        return "South"
+    else:
+        return "West"
+df['state_region'] = df['STNAME'].apply(lambda x: get_state_region(x))
+```
+
+
 ### to improve coding
 Go look at some of the top ranked
 questions on pandas on Stack Overflow, and look at how some of the more experienced
@@ -406,8 +462,19 @@ and the second item is the data
 frame reduced by that grouping.
 (condition, hole data frame reduced by the grouping)
 
+```py
+for group, frame in df.groupby('STNAME'):
+  #here we can see the in the froupby object we have
+  # key
+  #projected dataframe that was found for that group
+```
+the key is the one of the values that the group by return from the orignial data frame
+the frame is the complete frame with the "what we grouped by" is equal to it
 
-### note
+![image](Screenshot_7.png)
+
+
+### note group by and use that to segment your data.
 99% of the time, you'll use group by on one or more columns.
 But you can actually provide a function to group by as well and
 use that to **segment your data.**
@@ -417,68 +484,152 @@ It's important to note that in order
 to do this you need to set the index of
 the data frame to be the column
 that you want to group by first.
-
-
-##code
-pass in the columns to agg on the fucntion we want to be done
-```py
-df.groupby('STNAME').agg({'CENSUS2010POP': np.average})
-```
-### note
-Now, I want to flag a potential issue and using the aggregate method
-of group by objects.
-
-You see, when you pass in a **dictionary**
-it can be used to either to identify
-the **columns to apply a function** on or
-to **name an output column** if there's
-multiple functions to be run.
-
-**The difference depends on the keys that
-you pass in from the dictionary and
-how they're named.**
-this thing has been fixed in new pandas [Stackoverflow](https://stackoverflow.com/questions/60229375/solution-for-specificationerror-nested-renamer-is-not-supported-while-agg-alo)
-change
-```py
-temp['total'] = pd.DataFrame(project_data.groupby(col1)[col2].agg({'total':'count'})).reset_index()['total']
-
-temp['Avg'] = pd.DataFrame(project_data.groupby(col1)[col2].agg({'Avg':'mean'})).reset_index()['Avg']
-```
-
-to
-```py
-temp['total'] = pd.DataFrame(project_data.groupby(col1)[col2].agg(total='count')).reset_index()['total']
-temp['Avg'] = pd.DataFrame(project_data.groupby(col1)[col2].agg(Avg='mean')).reset_index()['Avg']
-```
-`
-.agg({'total':'count'})) into
-.agg(total='count'))
-`
-
-
-### note
+### code
 
 ```py
-print(type(df.groupby(level=0)['POPESTIMATE2010','POPESTIMATE2011']))
-print(type(df.groupby(level=0)['POPESTIMATE2010']))
+df = df.set_index('STNAME')
+
+def set_batch_number(item):
+    if item[0]<'M':
+        return 0
+    if item[0]<'Q':
+        return 1
+    return 2
+
+for group, frame in df.groupby(set_batch_number):
+    print('There are ' + str(len(frame)) + ' records in group ' + str(group) + ' for processing.')
+
+```
+Notice that this time I didn't pass in a column name to groupby(). Instead, I set the index of the dataframe to be STNAME, and if no column identifier is passed groupby() will automatically use the index.
+
+#### note  So, how would I group by both of these columns? A first approach might be to promote them to a multiindex and just call groupby()
+
+```py
+df=df.set_index(["cancellation_policy","review_scores_value"])
+for group, frame in df.groupby(level=(0,1)):
+    print(group)
+```
+#### note more complex grouping
+This seems to work ok. But what if we wanted to group by the cancelation policy and review scores, **but separate out all the 10's from those under ten?** In this case, we could use a **function** to manage the
+groupings and apply to the groupby
+
+```py
+def grouping_fun(item):
+    # Check the "review_scores_value" portion of the index. item is in the format of
+    # (cancellation_policy,review_scores_value
+    if item[1] == 10.0:
+        return (item[0],"10.0")
+    else:
+        return (item[0],"not 10.0")
+
+for group, frame in df.groupby(by=grouping_fun):
+    print(group)
 ```
 
+### Aggregation
 
-### Note
-while much of the documentation
-and examples will talk about a single
-groupby object,
-there's really two different objects.
-The data frame groupby and
-the series groupby.
-And these objects behave a little
-bit differently with aggregate.
+```py
+df.groupby("cancellation_policy").agg({"review_scores_value":np.average})
+```
+##### note
+np.average does not ignore nans!
+there is a function we can use for this
+```py
+df.groupby("cancellation_policy").agg({"review_scores_value":np.nanmean})
+```
+We can just extend this dictionary to aggregate by multiple functions or multiple columns.
+```py
+df.groupby("cancellation_policy").agg({"review_scores_value":(np.nanmean,np.nanstd),
+                                      "reviews_per_month":np.nanmean})
+```
+The agg function is going to apply one or more
+functions we specify to the group dataframes and return a single row per dataframe/group.
 
-`
-<class 'pandas.core.groupby.generic.DataFrameGroupBy'>
+### Transformation
+ Transformation is different from aggregation. Where agg() returns a single value per column, so one row per
+ group,
 
-<class 'pandas.core.groupby.generic.SeriesGroupBy'>
-`
+ **tranform()** returns an object that is the same size as the group. Essentially, it broadcasts the
+ function you supply over the grouped dataframe, returning a **new** **dataframe**. This makes **combining** **data** **later**
+ **easy**.
+من الاخر بيوزع النتيجه على كله
+
+####example
+
+ For instance, suppose we want to include the average rating values in a given group by cancellation policy,
+ but preserve the dataframe shape so that we could generate a difference between an individual observation
+ and the sum.
+```py
+# First, lets define just some subset of columns we are interested in
+cols=['cancellation_policy','review_scores_value']
+# Now lets transform it, I'll store this in its own dataframe
+transform_df=df[cols].groupby('cancellation_policy').transform(np.nanmean)
+
+#So lets just join this in. Before we do that, lets rename the column in the transformed version
+transform_df.rename({'review_scores_value':'mean_review_scores'}, axis='columns', inplace=True)
+df=df.merge(transform_df, left_index=True, right_index=True)
+```
+
+#### why we use it
+ Great, we can see that our new column is in place, the mean_review_scores. So now we could create, for
+ instance, the difference between a given row and it's group (the cancellation policy) means.
+```py
+df['mean_diff']=np.absolute(df['review_scores_value']-df['mean_review_scores'])
+```
+the transform
+
+
+![](Screenshot_8.png)
+
+
+the agg
+
+![](Screenshot_9.png)
+
+### Filtering
+
+The GroupBy object has build in support for **filtering** groups as well. It's often that you'll want to group
+by some feature, then make some **transformation** to the groups, then drop certain groups as part of your
+cleaning routines. **The filter()** function takes in a function which it applies to each group dataframe and
+returns** either a True or a False**, depending upon whether that group should be included in the results.
+
+ For instance, if we only want those groups which have a mean rating above 9 included in our results
+ ```py
+df.groupby('cancellation_policy').filter(lambda x: np.nanmean(x['review_scores_value'])>9.2)
+```
+### Applying
+
+By far the most common operation I invoke on groupby objects is the apply() function. This allows you to
+apply an arbitrary function to each group, and stitch the results back for each apply() into a single
+ dataframe where the index is preserved.
+
+```py
+# And lets just include some of the columns we were interested in previously
+df=df[['cancellation_policy','review_scores_value']]
+```
+ In previous work we wanted to find the average review score of a listing and its deviation from the group
+ mean. This was a two step process, first we used transform() on the groupby object and then we had to
+ broadcast to create a new column. With apply() we could wrap this logic in one place
+
+ ```py
+ def calc_mean_review_scores(group):
+    # group is a dataframe just of whatever we have grouped by, e.g. cancellation policy, so we can treat
+    # this as the complete dataframe
+    avg=np.nanmean(group["review_scores_value"])
+    # now broadcast our formula and create a new column
+    group["review_scores_mean"]=np.abs(avg-group["review_scores_value"])
+    return group
+
+# Now just apply this to the groups
+df.groupby('cancellation_policy').apply(calc_mean_review_scores).head()
+```
+![](Screenshot_10.png)
+
+#### note
+Using apply can be slower than using some of the specialized functions, especially agg(). But, if your
+ dataframes are not huge, it's a solid general purpose approach
+
+
 ----
 ## scales
 
@@ -514,20 +665,115 @@ and multiplication are all valid.
 
    The ratio scale is exactly the same as the interval scale with one major difference: zero is meaningful. For example, a height of zero is meaningful (it means you don’t exist). Compare that to a temperature of zero, which while it exists, it doesn’t mean anything in particular (although admittedly, in the Celsius scale it’s the freezing point for water).
 
+
+```py
+df['column'].astype("category").head()
+#>c
+# ok	C+
+# ok	C-
+# poor	D+
+# poor	D
+
+my_categories=pd.CategoricalDtype(categories=['D', 'D+', 'C-', 'C', 'C+', 'B-', 'B', 'B+', 'A-', 'A', 'A+'],
+                           ordered=True)
+# then we can just pass this to the astype() function
+df['column'].astype(my_categories)
+#>C
+# excellent    A+
+# excellent     A
+# excellent    A-
+# good         B+
+# good          B
+# good         B-
+# ok           C+
+```
+
+Sometimes it is useful to represent **categorical** values as each being a column with a true or a false as to
+whether the category applies.
+This is especially common in feature extraction, which is a topic in the **data**
+**mining** course. Variables with a **boolean** value are typically called **dummy** **variables**, and pandas has a built
+in function called `get_dummies` which will convert the values of a single column into multiple columns of
+zeros and ones indicating the presence of the dummy variable. I rarely use it, but when I do it's very
+handy.
+
+Now, cutting is just one way to build categories from your data, and there are many other methods. For
+instance, cut gives you interval data, where the spacing between each category is equal sized. But sometimes
+you want to form categories based on frequency – you want the number of items in each bin to the be the
+same, instead of the spacing between bins. It really depends on what the shape of your data is, and what
+you’re planning to do with it.
+
+
+###Pivot tables
+A pivot table is a way of summarizing data in a DataFrame for a particular purpose. It makes heavy use of the aggregation function. A pivot table is itself a DataFrame, where the rows represent one variable that you're interested in, the columns another, and the cell's some aggregate value. A pivot table also tends to includes marginal values as well, which are the sums for each column and row. This allows you to be able to see the relationship between two variables at just a glance.
+
+A pivot table allows us to pivot out one of these columns a new column headers and compare it against
+another column as row indices. Let's say we want to compare rank level versus country of the universities
+and we want to compare in terms of overall score
+
+To do this, we tell Pandas we want the values to be Score, and index to be the country and the columns to be
+the rank levels. Then we specify that the aggregation function, and here we'll use the NumPy mean to get the
+average rating for universities in that country
+```py
+df.pivot_table(values='score', index='country', columns='Rank_Level', aggfunc=[np.mean]).head()
+df.pivot_table(values='score', index='country', columns='Rank_Level', aggfunc=[np.mean, np.max]).head()
+df.pivot_table(values='score', index='country', columns='Rank_Level', aggfunc=[np.mean, np.max],
+               margins=True).head()
+# What if we want to find the country that has the maximum average score on First Tier Top University level?
+# We can use the idxmax() function.
+new_df['mean']['First Tier Top Unversity'].idxmax()
+```
+#### note
+If you want to achieve a different shape of your pivot table, you can do so with the stack and unstack
+functions. Stacking is pivoting the lowermost column index to become the innermost row index. Unstacking is
+the inverse of stacking, pivoting the innermost row index to become the lowermost column index. An example
+will help make this clear
+
+let's try stacking, this should move the lowermost column, so the tiers of the university rankings, to the inner most row
+```py
+new_df=new_df.stack()
+```
+![](Screenshot_11.png)
+
 ---
 ## time in python
+In today's lecture, where we'll be looking at the time series and date functionally in pandas. Manipulating dates and time is quite flexible in Pandas and thus allows us to conduct more analysis such as time series analysis, which we will talk about soon. Actually, pandas was originally created by Wed McKinney to handle date and time data when he worked as a consultant for hedge funds.
+Pandas has four main time related classes.
+1. Timestamp
+2. DatetimeIndex
+3. Period
+4. PeriodIndex
+
 
 ### Timestamp
+
 point of time
 ```py
 pd.Timestamp('9/1/2016 10:05AM')
+pd.Timestamp(2019, 12, 20, 0, 0)
+
+pd.Timestamp(2019, 12, 20, 0, 0).isoweekday()
+
+
+pd.Timestamp(2019, 12, 20, 5, 2,23).second
 ```
+such as isoweekday(), which shows the weekday of the timestamp
+note that 1 represents Monday and 7 represents Sunday
+
+ You can find extract the specific year, month, day, hour, minute, second from a timestamp
+
 
 ### period
 span of time specfic date or month
+
 ```py
 pd.Period('1/2016')
 pd.Period('3/5/2016')
+```
+Period objects represent the full timespan that you specify. Arithmetic on period is very easy and
+intuitive, for instance, if we want to find out 5 months after January 2016, we simply plus 5
+```py
+pd.Period('1/2016') + 5
+pd.Period('3/5/2016') - 2
 ```
 
 ### DatetimeIndex
@@ -536,9 +782,12 @@ it's time stamp index
 ### PeriodIndex
  it's a period index
 
+
+
 ### Converting to Datetime
 ```py
 pd.to_datetime('column')
+pd.to_datetime(df.index)
 ```
  to order
 
@@ -547,13 +796,22 @@ pd.to_datetime('4.7.12', dayfirst=True)
 ```
 
 ### Timedeltas
-it's the deffrect in time
+it's the differences in time
 
 ```py
 pd.Timestamp('9/3/2016')-pd.Timestamp('9/1/2016')
 
 pd.Timestamp('9/2/2016 8:10AM') + pd.Timedelta('12D 3H')
 ```
+### offset
+similar to timedelta, but it follows specific calendar duration rules
+
+```py
+pd.Timestamp('9/4/2016') + pd.offsets.Week()
+pd.Timestamp('9/4/2016') + pd.offsets.MonthEnd()
+```
+
+
 ---
 ## Working with Dates in a Dataframe
 
@@ -562,10 +820,27 @@ creat date time index
 pd.date_range('10-01-2016', periods=9, freq='2W-SUN')
 ```
 
+freq =
+```py
+freq='2W-SUN' #biweekly on Sunday
+freq='B' #business day
+freq='QS-JUN' #quarter start in June
+```
+check what day of the week a specific date is
+```py
+df.index.weekday_name
+```
+find the difference between each date's value.
+
+```py
+df.diff()
+```
+
+
 the day it self
 ```py
 df.index.day_name()
-````
+```
 
 ### find the mean for each month
 
@@ -583,6 +858,8 @@ df['2016-12']
 df['2016-12':]
 
 ```
+
+
 ### change the frequnecy of the dates in our DataFrame
 
 ```py
@@ -594,6 +871,13 @@ df.asfreq('W', method='ffill')
 
 week project to test the ability that i have learnt
 
+### scipy
+is an interesting collection of libraries for data science and you'll use most or perpahs all of
+these libraries. It includes numpy and pandas, but also plotting libraries such as matplotlib, and a
+number of scientific library functions as well
+```py
+from scipy import stats
+```
 
 test the binomial distribution
 
@@ -610,6 +894,7 @@ have 2 or more peaks
 ![image](Screenshot_1.png)
 
 in the end her refered to Allen B. Downey book [thinkstats](https://greenteapress.com/thinkstats2/thinkstats2.pdf)
+
 
 
 ### Hypothesis Testing
@@ -632,15 +917,30 @@ we accept our alternative(our IDEA).
 If we look at the mean values for
 the late data frame as well, we get surprisingly similar numbers.
 
-There are slight differences, though.
+But, are they the same? What do we mean by similar?
 
-It looks like the end
-of the six assignments,
-the early users are doing better
-by about a percentage point.
+This is where the students' t-test comes in.
+It allows us to **form** the alternative hypothesis ("These are different") as well
+as the **null** hypothesis ("These are the same") and then **test** that **null** **hypothesis**.
 
 
-**So, is this enough to go ahead and make some interventions to actually try and change something in the way we teach?**
+When doing hypothesis testing, we have to choose a **significance level** as a threshold for how much of a
+**chance** we're willing to accept. This significance level is typically called alpha. #For this example, let's
+use a **threshold of 0.05** for our alpha or 5%. Now this is a commonly used number but it's really quite
+arbitrary.
+
+
+The SciPy library contains a number of different statistical tests and forms a basis for hypothesis testing
+in Python and we're going to use the **ttest_ind()** function which does an independent t-test (meaning the
+populations are not related to one another). The result of **ttest_index**() are the **t-statistic and a p-value.**
+It's this latter value, the probability, which is most important to us, as it indicates the chance (between
+0 and 1) of our null hypothesis being True.
+
+
+So here we see that the **probability** is** 0.18** **>** of **0.05**. This means that we
+**cannot** **reject** the **null** hypothesis. The null hypothesis was that the two populations are the same, and we
+don't have enough certainty in our evidence (**because it is greater than alpha**) to come to a conclusion to
+the contrary. This doesn't mean that we have proven the populations are the same.
 
 #### threshold
 
@@ -693,3 +993,6 @@ we need a p value of .05 or less to reject the null and say that our idea is goo
 
 #### p hacking
 ![image](Screenshot_4.png)
+
+
+In this lecture, we've discussed just some of the basics of hypothesis testing in Python. I introduced you to the SciPy library, which you can use for the students t test. We've discussed some of the practical issues which arise from looking for statistical significance. There's much more to learn about hypothesis testing, for instance, there are different tests used, depending on the shape of your data and different ways to report results instead of just p-values such as confidence intervals or bayesian analyses. But this should give you a basic idea of where to start when comparing two populations for differences, which is a common task for data scientists.
