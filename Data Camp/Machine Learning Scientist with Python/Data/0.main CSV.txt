@@ -1,0 +1,27 @@
+Auto 
+mpg	displ	hp	weight	accel	origin	size
+
+boston
+CRIM	ZN	INDUS	CHAS	NX	RM	AGE	DIS	RAD	TAX	PTRATIO	B	LSTAT	MEDV
+
+diabetes
+pregnancies	glucose	diastolic	triceps	insulin	bmi	dpf	age	diabetes
+
+diabetes1
+Pregnancies	Glucose	BloodPressure	SkinThickness	Insulin	BMI	DiabetesPedigreeFunction	Age	Outcome
+
+
+gm_2008_region
+population	fertility	HIV	CO2	BMI_male	GDP	BMI_female	life	child_mortality	Region
+
+
+house-votes-84
+republican	n	y	n	y	y	y	n	n	n	y	?	y	y	y	n	y
+
+
+white-wine
+fixed acidity	volatile acidity	citric acid	residual sugar	chlorides	free sulfur dioxide	total sulfur dioxide	density	pH	sulphates	alcohol	quality
+
+winequality-red
+fixed acidity;"volatile acidity";"citric acid";"residual sugar";"chlorides";"free sulfur dioxide";"total sulfur dioxide";"density";"pH";"sulphates";"alcohol";"quality"
+
