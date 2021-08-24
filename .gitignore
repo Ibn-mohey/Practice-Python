@@ -153,3 +153,6 @@ Data Camp/Machine Learning Scientist with Python/Data/wine.csv
 *.txt
 Data Camp/Machine Learning Scientist with Python/Data/new_points
 Data Camp/Machine Learning Scientist with Python/Data/pionts
+*.feat
+*.vocab
+Data Camp/Machine Learning Scientist with Python/Data/aclImdb/README
