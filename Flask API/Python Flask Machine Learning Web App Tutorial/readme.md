@@ -1,7 +1,3 @@
-
-# HeadLine 
-this is a walkthrow with the Tutorial [Python Flask Machine Learning Web App Tutorial](https://www.youtube.com/watch?v=qNF1HqBvpGE)
-
 # description
 in this folder i made small flask app that uses a linear Machine learning model to predict the height based on the age of the person  
 
