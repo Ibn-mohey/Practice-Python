@@ -18,7 +18,7 @@ in this folder i made small flask app that uses a linear Machine learning model 
 
 the Base model with original 
 
-![alt text](APP\static\base_pic.svg)
+![alt text](APP/static/base_pic.svg)
 
 some predictions examples 
 
