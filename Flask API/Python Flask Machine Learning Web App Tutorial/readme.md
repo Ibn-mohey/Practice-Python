@@ -22,8 +22,8 @@ the Base model with original
 
 some predictions examples 
 
-![alt text](APP\static\predictions_pic.svg)
+![alt text](APP/static/predictions_pic.svg)
 
-![alt text](APP\static\4aa768b6b3254ab2b30b286e3cfac308.svg)
+![alt text](APP/static/4aa768b6b3254ab2b30b286e3cfac308.svg)
 
-![alt text](APP\static\e26466d3e2c54143b10320ac92e334d5.svg)
+![alt text](APP/static/e26466d3e2c54143b10320ac92e334d5.svg)
