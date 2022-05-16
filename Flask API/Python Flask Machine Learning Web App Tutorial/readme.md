@@ -1,7 +1,7 @@
 # description
 in this folder i made small flask app that uses a linear Machine learning model to predict the height based on the age of the person  
 
-# libiralries used 
+# libraries used 
 
 * pandas > to read the data 
 * numpy > to convirt it into usable form
