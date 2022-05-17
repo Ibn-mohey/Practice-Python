@@ -1,11 +1,7 @@
-
-# HeadLine 
-this is a walkthrow with the Tutorial [Python Flask Machine Learning Web App Tutorial](https://www.youtube.com/watch?v=qNF1HqBvpGE)
-
 # description
 in this folder i made small flask app that uses a linear Machine learning model to predict the height based on the age of the person  
 
-# libiralries used 
+# libraries used 
 
 * pandas > to read the data 
 * numpy > to convirt it into usable form
@@ -18,12 +14,12 @@ in this folder i made small flask app that uses a linear Machine learning model 
 
 the Base model with original 
 
-![alt text](APP\static\base_pic.svg)
+![alt text](APP/static/base_pic.svg)
 
 some predictions examples 
 
-![alt text](APP\static\predictions_pic.svg)
+![alt text](APP/static/predictions_pic.svg)
 
-![alt text](APP\static\4aa768b6b3254ab2b30b286e3cfac308.svg)
+![alt text](APP/static/4aa768b6b3254ab2b30b286e3cfac308.svg)
 
-![alt text](APP\static\e26466d3e2c54143b10320ac92e334d5.svg)
+![alt text](APP/static/e26466d3e2c54143b10320ac92e334d5.svg)
