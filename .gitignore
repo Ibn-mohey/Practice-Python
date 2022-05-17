@@ -198,3 +198,5 @@ Data Camp/Machine Learning Scientist with Python/Data/comic_con.csv
 Data Camp/Machine Learning Scientist with Python/Data/batman.jpg
 Data Camp/Machine Learning Scientist with Python/.ipynb_checkpoints/06.Cluster Analysis in Python-checkpoint.ipynb
 Leet code/.ipynb_checkpoints/Tries and tests-checkpoint.ipynb
+*.pyc
+Flask API/Flask API/New folder/books.sqlit2e
