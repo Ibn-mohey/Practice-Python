@@ -150,7 +150,7 @@ Data Camp/Machine Learning Scientist with Python/Data/seeds.csv
 Data Camp/Machine Learning Scientist with Python/Data/wikipedia-vectors.csv
 Data Camp/Machine Learning Scientist with Python/Data/wikipedia-vocabulary-utf8.txt
 Data Camp/Machine Learning Scientist with Python/Data/wine.csv
-*.txt
+
 Data Camp/Machine Learning Scientist with Python/Data/new_points
 Data Camp/Machine Learning Scientist with Python/Data/pionts
 *.feat
@@ -201,3 +201,8 @@ Leet code/.ipynb_checkpoints/Tries and tests-checkpoint.ipynb
 *.pyc
 Flask API/Flask API/New folder/books.sqlit2e
 *.pyc
+
+Data Camp/Machine Learning Scientist with Python/Data/aclImdb/
+Data Camp/Data/sample_df.txt
+Data Camp/Machine Learning Scientist with Python/Data
+Flask API/Flask API/creds.txt
