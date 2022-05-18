@@ -1,5 +1,6 @@
 from flask import Flask,request, jsonify
 import sqlite3
+import pymysql
 
 app = Flask(__name__)
 
@@ -7,8 +8,17 @@ app = Flask(__name__)
 def db_connection():
     conn = None
     try:
-        conn = sqlite3.connect("books.sqlite")
-    except sqlite3.error as e:
+        # conn = sqlite3.connect("books.sqlite")
+        conn = pymysql.connect(host= 'sql11.freesqldatabase.com',
+        database = 'sql11493041',
+        user= 'sql11493041',
+        password= 'R3EH8RhAww',
+        charset = 'utf8mb4',
+        cursorclass = pymysql.cursors.DictCursor
+            
+        )
+    # except sqlite3.error as e:
+    except pymysql.Error as e:
         print(e)
     return conn
 
@@ -69,18 +79,19 @@ books_list = [
 @app.route('/books',methods = ['GET',"POST"])
 def books():
     conn = db_connection()
-    # cursor = conn.cursor()
+    cursor = conn.cursor()
     
     
     if request.method == "GET":
-        cursor = conn.execute("select * from book")
+        cursor.execute("select * from book")
         
         books = [
-            dict(id=book[0], author=book[1], language=book[2], title=book[3])
+            dict(id=book['id'], author=book['author'], language=book['language'], title=book['title'])
             for book in cursor.fetchall()
         ]
         
         if len(books) >0:
+            conn.close()
             return jsonify(books)
         else:
             'Nothing Found', 404
@@ -90,12 +101,20 @@ def books():
         new_lang = request.form["language"]
         new_title = request.form["title"]
         sql = """INSERT INTO book (author, language, title)
-                 VALUES (?, ?, ?)"""
-        cursor = cursor.execute(sql, (new_author, new_lang, new_title))
+                 VALUES (%s, %s, %s)"""
+        cursor.execute(sql, (new_author, new_lang, new_title))
         conn.commit()
+        cursor = conn.cursor()
+        # new_book = {
+        #     "id": id,
+        #     "author": author,
+        #     "language": language,
+        #     "title": title,
+        # }
         last_row_sql = 'select *from book ORDER BY id DESC LIMIT 1;'
+        cursor.execute(last_row_sql)
         
-        return f"Book {conn.execute(last_row_sql).fetchall()[0]} created successfully"
+        return f"Book {cursor.fetchone()} created successfully"
 
 
 
@@ -105,7 +124,7 @@ def single_book(id):
     cursor = conn.cursor()
 
     if request.method == "GET":
-        cursor.execute("SELECT * FROM book WHERE id=?", (id,))
+        cursor.execute("SELECT * FROM book WHERE id=%s", (id,))
         try:
             thebook = cursor.fetchall()[0]
             return f" your book was {thebook}"
@@ -115,10 +134,10 @@ def single_book(id):
 
     if request.method == "PUT":
         sql = """UPDATE book
-                SET title=?,
-                    author=?,
-                    language=?
-                WHERE id=? """
+                SET title=%s,
+                    author=%s,
+                    language=%s
+                WHERE id=%s """
         author = request.form["author"]
         language = request.form["language"]
         title = request.form["title"]
@@ -128,15 +147,17 @@ def single_book(id):
             "language": language,
             "title": title,
         }
-        conn.execute(sql, (author, language, title, id))
+        cursor.execute(sql, (author, language, title, id))
         conn.commit()
+        conn.close()
         return jsonify(updated_book)
 
 
     if request.method == "DELETE":
-        sql = """ DELETE FROM book WHERE id=? """
-        conn.execute(sql, (id,))
+        sql = """ DELETE FROM book WHERE id=%s """
+        cursor.execute(sql, (id,))
         conn.commit()
+        conn.close()
         return f"The book with id: {id} has been deleted.", 200
 
 
